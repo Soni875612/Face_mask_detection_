@@ -58,7 +58,7 @@ With increasing importance of public health safety, this system can be deployed 
 With Mask ✅          Without Mask ❌
 ┌─────────────┐       ┌─────────────┐
 │  with_mask  │       │without_mask │
-│    98.2%    │       │    94.7%    │
+│    100%    │       │   99.4%   │
 └─────────────┘       └─────────────┘
  GREEN bounding box    RED bounding box
 ```
