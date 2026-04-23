@@ -53,12 +53,14 @@ With increasing importance of public health safety, this system can be deployed 
 <img width="821" height="652" alt="Screenshot 2026-04-23 163647" src="https://github.com/user-attachments/assets/66c67183-c107-4424-8cd2-a9d99f11823e" />
 
 
+## Vedio
+
 
 ```
 With Mask ✅          Without Mask ❌
 ┌─────────────┐       ┌─────────────┐
 │  with_mask  │       │without_mask │
-│    100%    │       │   99.4%   │
+│    100.0%    │       │   99.4%   │
 └─────────────┘       └─────────────┘
  GREEN bounding box    RED bounding box
 ```
