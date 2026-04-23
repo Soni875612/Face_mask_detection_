@@ -46,6 +46,10 @@ With increasing importance of public health safety, this system can be deployed 
 ## 🎬 Demo
 ## Emages
 <img width="807" height="642" alt="Screenshot 2026-04-23 091611" src="https://github.com/user-attachments/assets/43da8a49-d5c8-4cef-9afb-65aa1fbc6e67" />
+<img width="807" height="642" alt="Screenshot 2026-04-23 091611" src="https://github.com/user-attachments/assets/652a2a63-aacc-45a5-accd-67a51cc54b61" />
+<img width="814" height="640" alt="Screenshot 2026-04-23 163705" src="https://github.com/user-attachments/assets/d154b5fc-792f-4dac-9042-4e43592de4a5" />
+<img width="821" height="652" alt="Screenshot 2026-04-23 163647" src="https://github.com/user-attachments/assets/66c67183-c107-4424-8cd2-a9d99f11823e" />
+<img width="800" height="639" alt="Screenshot 2026-04-23 184733" src="https://github.com/user-attachments/assets/c7881fbf-384d-4c20-9da3-03bf51f4a3be" />
 
 
 ```
