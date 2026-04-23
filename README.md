@@ -1,10 +1,14 @@
-<img width="811" height="650" alt="Screenshot 2026-04-23 091530" src="https://github.com/user-attachments/assets/87463b9a-4342-430f-847b-559c96217a6e" /># 😷 Face Mask Detection System
+# 😷 Face Mask Detection System
 
 <div align="center">
+
+![Face Mask Detection](https://img.shields.io/badge/AI-Face%20Mask%20Detection-blue?style=for-the-badge&logo=tensorflow)
+![Accuracy](https://img.shields.io/badge/Accuracy-97%25-brightgreen?style=for-the-badge)
 ![Python](https://img.shields.io/badge/Python-3.13-blue?style=for-the-badge&logo=python)
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-2.21-orange?style=for-the-badge&logo=tensorflow)
 ![Flask](https://img.shields.io/badge/Flask-3.0-black?style=for-the-badge&logo=flask)
 ![OpenCV](https://img.shields.io/badge/OpenCV-4.13-green?style=for-the-badge&logo=opencv)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 
 **An AI-powered real-time face mask detection system built with Deep Learning.**  
 Detects mask/no-mask in real-time via webcam or uploaded images with bounding boxes and confidence scores.
