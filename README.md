@@ -44,6 +44,9 @@ With increasing importance of public health safety, this system can be deployed 
 ---
 
 ## 🎬 Demo
+## Emages
+<img width="807" height="642" alt="Screenshot 2026-04-23 091611" src="https://github.com/user-attachments/assets/43da8a49-d5c8-4cef-9afb-65aa1fbc6e67" />
+
 
 ```
 With Mask ✅          Without Mask ❌
