@@ -1,9 +1,6 @@
 <img width="811" height="650" alt="Screenshot 2026-04-23 091530" src="https://github.com/user-attachments/assets/87463b9a-4342-430f-847b-559c96217a6e" /># 😷 Face Mask Detection System
 
 <div align="center">
-
-![Face Mask Detection](https://img.shields.io/badge/AI-Face%20Mask%20Detection-blue?style=for-the-badge&logo=tensorflow)
-<img width="811" height="650" alt="Screenshot 2026-04-23 091530" src="https://github.com/user-attachments/assets/ecd58c65-18c5-47b8-b00f-bffc7c6d3d1f" />
 ![Python](https://img.shields.io/badge/Python-3.13-blue?style=for-the-badge&logo=python)
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-2.21-orange?style=for-the-badge&logo=tensorflow)
 ![Flask](https://img.shields.io/badge/Flask-3.0-black?style=for-the-badge&logo=flask)
@@ -45,10 +42,11 @@ With increasing importance of public health safety, this system can be deployed 
 ## 🎬 Demo
 ## Emages
 <img width="807" height="642" alt="Screenshot 2026-04-23 091611" src="https://github.com/user-attachments/assets/43da8a49-d5c8-4cef-9afb-65aa1fbc6e67" />
-<img width="807" height="642" alt="Screenshot 2026-04-23 091611" src="https://github.com/user-attachments/assets/652a2a63-aacc-45a5-accd-67a51cc54b61" />
+<img width="811" height="650" alt="Screenshot 2026-04-23 091530" src="https://github.com/user-attachments/assets/4df46b0f-8145-495d-883d-0763354db39f" />
+
 <img width="814" height="640" alt="Screenshot 2026-04-23 163705" src="https://github.com/user-attachments/assets/d154b5fc-792f-4dac-9042-4e43592de4a5" />
 <img width="821" height="652" alt="Screenshot 2026-04-23 163647" src="https://github.com/user-attachments/assets/66c67183-c107-4424-8cd2-a9d99f11823e" />
-<img width="800" height="639" alt="Screenshot 2026-04-23 184733" src="https://github.com/user-attachments/assets/c7881fbf-384d-4c20-9da3-03bf51f4a3be" />
+
 
 
 ```
