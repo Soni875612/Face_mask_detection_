@@ -56,6 +56,10 @@ With increasing importance of public health safety, this system can be deployed 
 ## Vedio
 
 
+https://github.com/user-attachments/assets/e9c18579-d6b8-4793-8163-fcb60effe473
+
+
+
 ```
 With Mask ✅          Without Mask ❌
 ┌─────────────┐       ┌─────────────┐
