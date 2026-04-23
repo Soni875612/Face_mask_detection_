@@ -1,0 +1,453 @@
+  az  <a href="a"></a><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Face Mask Detection System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #060910; --surface: #0d1117; --surface2: #131924;
+      --border: #1e2d40; --accent: #00d4ff; --green: #00ff88;
+      --red: #ff3b3b; --orange: #ff9500; --text: #c9d8e8; --muted: #4a6080;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Rajdhani', sans-serif; min-height: 100vh; }
+
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 28px; border-bottom: 1px solid var(--border);
+      background: rgba(13,17,23,0.97); position: relative; z-index: 10;
+    }
+    .logo { display: flex; align-items: center; gap: 12px; }
+    .logo-icon {
+      width: 40px; height: 40px; border-radius: 8px; font-size: 20px;
+      background: linear-gradient(135deg, var(--accent), #0060ff);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 18px rgba(0,212,255,0.45);
+    }
+    .logo-text { font-size: 19px; font-weight: 700; letter-spacing: 2px; color: #fff; }
+    .logo-sub  { font-size: 10px; color: var(--muted); font-family: 'Share Tech Mono', monospace; letter-spacing: 3px; }
+    .hstatus { display: flex; align-items: center; gap: 8px; font-family: 'Share Tech Mono', monospace; font-size: 12px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 8px var(--orange); animation: pulse 2s infinite; }
+    .dot.live { background: var(--green); box-shadow: 0 0 8px var(--green); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .pill { padding: 3px 10px; border-radius: 20px; border: 1px solid var(--orange); color: var(--orange); font-size: 11px; }
+    .pill.live { border-color: var(--green); color: var(--green); }
+
+    .main { display: grid; grid-template-columns: 1fr 340px; gap: 18px; padding: 18px 22px; max-width: 1400px; margin: 0 auto; }
+
+    /* ═══ CAMERA BOX — THE FIXED PART ═══ */
+    .cam-outer {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%; /* 16:9 ratio */
+      background: #000;
+      border-radius: 12px;
+      border: 2px solid var(--accent);
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(0,212,255,0.15);
+    }
+    /* Everything inside cam-outer uses position:absolute */
+    .cam-outer video,
+    .cam-outer canvas,
+    .cam-outer .cam-inner {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+    }
+    .cam-outer video  { object-fit: cover; z-index: 1; display: block; }
+    .cam-outer canvas { z-index: 2; background: transparent; }
+    .cam-inner { z-index: 3; pointer-events: none; }
+
+    /* Corner brackets */
+    .br { position: absolute; width: 22px; height: 22px; z-index: 4; }
+    .br.tl { top:8px;left:8px;   border-top:2px solid var(--accent);border-left:2px solid var(--accent); }
+    .br.tr { top:8px;right:8px;  border-top:2px solid var(--accent);border-right:2px solid var(--accent); }
+    .br.bl { bottom:8px;left:8px; border-bottom:2px solid var(--accent);border-left:2px solid var(--accent); }
+    .br.brr{ bottom:8px;right:8px;border-bottom:2px solid var(--accent);border-right:2px solid var(--accent); }
+
+    /* Scan line */
+    .scan { position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:scan 3s linear infinite;opacity:0;z-index:5; }
+    .scanning .scan { opacity:.5; }
+    @keyframes scan { 0%{top:0} 100%{top:100%} }
+
+    /* Placeholder text */
+    .placeholder {
+      position: absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+      text-align:center; z-index:4; pointer-events:none;
+    }
+    .placeholder .icon { font-size:52px; margin-bottom:14px; }
+    .placeholder p { font-family:'Share Tech Mono',monospace; font-size:13px; color:var(--muted); }
+
+    /* Alert */
+    .alert-bar {
+      position:absolute; bottom:0; left:0; right:0; z-index:6;
+      background:linear-gradient(90deg,rgba(255,59,59,.92),rgba(160,10,10,.92));
+      padding:10px 16px; display:flex; align-items:center; gap:10px;
+      font-weight:700; letter-spacing:1px; font-size:14px;
+      transform:translateY(100%); transition:transform .3s;
+    }
+    .alert-bar.show { transform:translateY(0); }
+    .blink { animation:blink .7s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* Controls */
+    .controls { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; align-items:center; justify-content:space-between; }
+    .btns { display:flex; gap:10px; }
+    .btn { padding:10px 22px; border:none; border-radius:6px; font-family:'Rajdhani',sans-serif; font-size:15px; font-weight:600; letter-spacing:1px; cursor:pointer; transition:all .2s; }
+    .btn-start { background:linear-gradient(135deg,var(--accent),#0060ff); color:#fff; box-shadow:0 0 20px rgba(0,212,255,.3); }
+    .btn-start:hover { box-shadow:0 0 32px rgba(0,212,255,.55); }
+    .btn-start:disabled { opacity:.4; cursor:not-allowed; }
+    .btn-stop  { background:rgba(255,59,59,.15); color:var(--red); border:1px solid rgba(255,59,59,.3); }
+    .btn-reset { background:transparent; color:var(--muted); border:1px solid var(--border); }
+    .btn-reset:hover { color:var(--text); border-color:var(--accent); }
+    .meta { font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--muted); display:flex; gap:10px; }
+    .meta span { color:var(--accent); }
+
+    /* Sidebar */
+    .sidebar { display:flex; flex-direction:column; gap:14px; }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px; }
+    .card-title { font-family:'Share Tech Mono',monospace; font-size:11px; letter-spacing:3px; color:var(--accent); margin-bottom:14px; }
+    .sgrid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .sbox { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:12px; text-align:center; }
+    .sval { font-size:30px; font-weight:700; font-family:'Share Tech Mono',monospace; }
+    .slbl { font-size:10px; color:var(--muted); margin-top:3px; letter-spacing:1px; }
+    .sval.g { color:var(--green); text-shadow:0 0 10px rgba(0,255,136,.4); }
+    .sval.r { color:var(--red);   text-shadow:0 0 10px rgba(255,59,59,.4); }
+    .sval.o { color:var(--orange);text-shadow:0 0 10px rgba(255,149,0,.4); }
+    .sval.b { color:var(--accent);text-shadow:0 0 10px rgba(0,212,255,.4); }
+    .comp-label { display:flex; justify-content:space-between; font-size:13px; margin:14px 0 6px; }
+    .cpct { font-weight:700; color:var(--green); }
+    .track { height:8px; background:var(--surface2); border-radius:4px; overflow:hidden; border:1px solid var(--border); }
+    .fill  { height:100%; border-radius:4px; transition:width .4s,background .4s; background:linear-gradient(90deg,var(--green),#00ffcc); }
+    .fill.w { background:linear-gradient(90deg,var(--orange),#ffcc00); }
+    .fill.b2{ background:linear-gradient(90deg,var(--red),#ff6060); }
+    .det-list { display:flex; flex-direction:column; gap:8px; min-height:56px; }
+    .det-item { display:flex; align-items:center; gap:10px; background:var(--surface2); border-radius:6px; padding:10px 12px; border-left:3px solid #333; }
+    .ddot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+    .dlabel { font-weight:600; font-size:14px; }
+    .dconf  { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--muted); }
+    .drisk  { font-size:10px; font-weight:700; letter-spacing:1px; padding:2px 7px; border-radius:4px; }
+    .risk-LOW    { background:rgba(0,255,136,.1); color:var(--green); }
+    .risk-MEDIUM { background:rgba(255,149,0,.1);  color:var(--orange); }
+    .risk-HIGH   { background:rgba(255,59,59,.1);   color:var(--red); }
+    .no-face { text-align:center; padding:18px; color:var(--muted); font-family:'Share Tech Mono',monospace; font-size:12px; }
+    .legend { display:flex; flex-direction:column; gap:8px; }
+    .lrow { display:flex; align-items:center; gap:10px; font-size:13px; }
+    .ldot { width:12px; height:12px; border-radius:3px; flex-shrink:0; }
+    .pipe { display:flex; flex-direction:column; }
+    .pstep { display:flex; gap:12px; padding:9px 0; border-bottom:1px solid var(--border); }
+    .pstep:last-child { border:none; }
+    .pnum { width:24px; height:24px; border-radius:50%; background:var(--surface2); border:1px solid var(--accent); display:flex; align-items:center; justify-content:center; font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--accent); flex-shrink:0; }
+    .ptitle { font-weight:600; font-size:13px; }
+    .pdesc  { font-size:11px; color:var(--muted); margin-top:2px; }
+    footer { text-align:center; padding:14px; border-top:1px solid var(--border); font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--muted); letter-spacing:2px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🛡</div>
+    <div>
+      <div class="logo-text">FACE MASK DETECTION</div>
+      <div class="logo-sub">AI SAFETY SURVEILLANCE SYSTEM</div>
+    </div>
+  </div>
+  <div class="hstatus">
+    <div class="dot" id="sdot"></div>
+    <span id="stxt">INITIALISING...</span>
+    &nbsp;|&nbsp;
+    <span class="pill" id="mpill">DEMO</span>
+  </div>
+</header>
+
+<div class="main">
+  <div>
+    <!-- CAMERA BOX -->
+    <div class="cam-outer" id="camWrap">
+      <!-- Video feed -->
+      <video id="video" autoplay muted playsinline></video>
+      <!-- Detection overlay -->
+      <canvas id="canvas"></canvas>
+      <!-- Inner decorations -->
+      <div class="cam-inner">
+        <div class="br tl"></div><div class="br tr"></div>
+        <div class="br bl"></div><div class="br brr"></div>
+        <div class="scan"></div>
+        <div class="placeholder" id="placeholder">
+          <div class="icon">📷</div>
+          <p>CLICK "START CAMERA" TO BEGIN</p>
+          <p style="margin-top:6px;font-size:11px">Camera permission will be requested</p>
+        </div>
+        <div class="alert-bar" id="alertBar">
+          <span class="blink">⚠</span> ALERT — UNMASKED PERSON DETECTED
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <div class="btns">
+        <button class="btn btn-start" id="btnStart">▶ START CAMERA</button>
+        <button class="btn btn-stop"  id="btnStop"  disabled>■ STOP</button>
+        <button class="btn btn-reset" id="btnReset">↺ RESET</button>
+      </div>
+      <div class="meta">
+        FPS:<span id="fps">—</span> &nbsp;|&nbsp;
+        FRAMES:<span id="frames">0</span> &nbsp;|&nbsp;
+        UPTIME:<span id="uptime">0s</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="card">
+      <div class="card-title">◈ LIVE STATISTICS</div>
+      <div class="sgrid">
+        <div class="sbox"><div class="sval g" id="sMasked">0</div><div class="slbl">WITH MASK</div></div>
+        <div class="sbox"><div class="sval r" id="sUnmasked">0</div><div class="slbl">WITHOUT MASK</div></div>
+        <div class="sbox"><div class="sval o" id="sWrong">0</div><div class="slbl">WORN WRONG</div></div>
+        <div class="sbox"><div class="sval b" id="sAlerts">0</div><div class="slbl">ALERTS</div></div>
+      </div>
+      <div class="comp-label"><span>COMPLIANCE RATE</span><span class="cpct" id="cpct">100%</span></div>
+      <div class="track"><div class="fill" id="mfill" style="width:100%"></div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">◈ CURRENT DETECTIONS</div>
+      <div class="det-list" id="detList"><div class="no-face">NO FACES IN FRAME</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">◈ CLASS LEGEND</div>
+      <div class="legend">
+        <div class="lrow"><div class="ldot" style="background:#00ff88"></div><div><div style="font-weight:600">WithMask</div><div style="font-size:11px;color:var(--muted)">Properly wearing mask — LOW RISK</div></div></div>
+        <div class="lrow"><div class="ldot" style="background:#ff3b3b"></div><div><div style="font-weight:600">WithoutMask</div><div style="font-size:11px;color:var(--muted)">No mask detected — HIGH RISK</div></div></div>
+        <div class="lrow"><div class="ldot" style="background:#ff9500"></div><div><div style="font-weight:600">MaskWornIncorrectly</div><div style="font-size:11px;color:var(--muted)">Mask not covering face — MEDIUM RISK</div></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">◈ HOW IT WORKS</div>
+      <div class="pipe">
+        <div class="pstep"><div class="pnum">1</div><div><div class="ptitle">Face Detection</div><div class="pdesc">Haar Cascade localises faces in each frame</div></div></div>
+        <div class="pstep"><div class="pnum">2</div><div><div class="ptitle">ROI Extraction</div><div class="pdesc">Face region cropped + padded → 224×224</div></div></div>
+        <div class="pstep"><div class="pnum">3</div><div><div class="ptitle">CNN Classification</div><div class="pdesc">MobileNetV2 backbone → Softmax(3 classes)</div></div></div>
+        <div class="pstep"><div class="pnum">4</div><div><div class="ptitle">Risk Assessment</div><div class="pdesc">Label + confidence → Risk level + alert</div></div></div>
+        <div class="pstep"><div class="pnum">5</div><div><div class="ptitle">Analytics</div><div class="pdesc">Session stats, compliance %, HTML report</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>MOBILENETV2 + OPENCV + TENSORFLOW &nbsp;|&nbsp; FACE MASK DETECTION &nbsp;|&nbsp; ALL INDIA PROJECT</footer>
+
+<script>
+  // ── State ──────────────────────────────────────────────────────
+  let active = false, stream = null, intervalId = null, fpsTs = [];
+
+  const video    = document.getElementById("video");
+  const canvas   = document.getElementById("canvas");
+  const ctx      = canvas.getContext("2d");
+  const camWrap  = document.getElementById("camWrap");
+  const ph       = document.getElementById("placeholder");
+  const alertBar = document.getElementById("alertBar");
+  const detList  = document.getElementById("detList");
+  const btnStart = document.getElementById("btnStart");
+  const btnStop  = document.getElementById("btnStop");
+  const btnReset = document.getElementById("btnReset");
+
+  // ── Init ───────────────────────────────────────────────────────
+  (async () => {
+    try {
+      const d = await (await fetch("/api/status")).json();
+      if (d.model_loaded) {
+        document.getElementById("sdot").classList.add("live");
+        document.getElementById("stxt").textContent = "MODEL LOADED — LIVE MODE";
+        document.getElementById("mpill").textContent = "LIVE";
+        document.getElementById("mpill").classList.add("live");
+      } else {
+        document.getElementById("stxt").textContent = "DEMO MODE (train model first)";
+      }
+    } catch(e) {}
+  })();
+
+  // ── START CAMERA ───────────────────────────────────────────────
+  btnStart.addEventListener("click", async () => {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false
+      });
+
+      video.srcObject = stream;
+
+      // Wait for video to actually have dimensions
+      await new Promise(resolve => {
+        const check = () => {
+          if (video.readyState >= 2 && video.videoWidth > 0) {
+            resolve();
+          } else {
+            video.addEventListener("canplay", resolve, { once: true });
+          }
+        };
+        video.onloadedmetadata = check;
+        check();
+      });
+
+      await video.play();
+
+      // Sync canvas size to actual video dimensions
+      canvas.width  = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      active = true;
+      ph.style.display  = "none";
+      btnStart.disabled = true;
+      btnStop.disabled  = false;
+      camWrap.classList.add("scanning");
+      intervalId = setInterval(processFrame, 250);
+
+    } catch(err) {
+      alert("❌ Camera error: " + err.message + "\n\nMake sure you opened http://localhost:5001 (not file://)");
+      console.error(err);
+    }
+  });
+
+  // ── STOP ───────────────────────────────────────────────────────
+  btnStop.addEventListener("click", () => {
+    active = false;
+    clearInterval(intervalId);
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    video.srcObject = null;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ph.style.display = "block";
+    btnStart.disabled = false;
+    btnStop.disabled  = true;
+    camWrap.classList.remove("scanning");
+    alertBar.classList.remove("show");
+    detList.innerHTML = '<div class="no-face">NO FACES IN FRAME</div>';
+  });
+
+  // ── RESET ──────────────────────────────────────────────────────
+  btnReset.addEventListener("click", async () => {
+    await fetch("/api/reset", { method: "POST" });
+    ["sMasked","sUnmasked","sWrong","sAlerts","frames"].forEach(id => document.getElementById(id).textContent = "0");
+    document.getElementById("cpct").textContent = "100%";
+    document.getElementById("mfill").style.width = "100%";
+    document.getElementById("mfill").className = "fill";
+    document.getElementById("fps").textContent = "—";
+    document.getElementById("uptime").textContent = "0s";
+    fpsTs = [];
+  });
+
+  // ── PROCESS FRAME ──────────────────────────────────────────────
+  async function processFrame() {
+    if (!active || video.readyState < 2 || video.videoWidth === 0) return;
+
+    const tmp = document.createElement("canvas");
+    tmp.width  = video.videoWidth;
+    tmp.height = video.videoHeight;
+    tmp.getContext("2d").drawImage(video, 0, 0);
+    const dataURL = tmp.toDataURL("image/jpeg", 0.8);
+
+    try {
+      const res  = await fetch("/api/detect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: dataURL })
+      });
+      const data = await res.json();
+      if (!data.error) {
+        draw(data.detections, data.alert);
+        updateStats(data.stats);
+        updateFPS();
+      }
+    } catch(e) { console.warn("detect error:", e); }
+  }
+
+  // ── DRAW BOXES ─────────────────────────────────────────────────
+  function draw(dets, alert) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const CM = { WithMask:"#00ff88", WithoutMask:"#ff3b3b", MaskWornIncorrectly:"#ff9500", Uncertain:"#888" };
+
+    dets.forEach(d => {
+      const { x, y, w, h } = d.bbox;
+      const col = d.color || CM[d.label] || "#888";
+
+      // Box
+      ctx.shadowColor = col; ctx.shadowBlur = 14;
+      ctx.strokeStyle = col; ctx.lineWidth = 2.5;
+      ctx.strokeRect(x, y, w, h);
+      ctx.shadowBlur = 0;
+
+      // Fill
+      ctx.fillStyle = col + "25";
+      ctx.fillRect(x, y, w, h);
+
+      // Label
+      const txt = d.label + "  " + (d.confidence*100).toFixed(1) + "%";
+      ctx.font = "bold 13px sans-serif";
+      const tw = ctx.measureText(txt).width;
+      const py = y > 32 ? y - 28 : y + h + 4;
+      ctx.fillStyle = col;
+      ctx.fillRect(x - 1, py, tw + 14, 22);
+      ctx.fillStyle = "#fff";
+      ctx.fillText(txt, x + 6, py + 15);
+
+      // Corner ticks
+      const t = 12;
+      ctx.strokeStyle = col; ctx.lineWidth = 2.5;
+      [[x,y,1,1],[x+w,y,-1,1],[x,y+h,1,-1],[x+w,y+h,-1,-1]].forEach(([cx,cy,sx,sy]) => {
+        ctx.beginPath();
+        ctx.moveTo(cx, cy+sy*t); ctx.lineTo(cx, cy); ctx.lineTo(cx+sx*t, cy);
+        ctx.stroke();
+      });
+    });
+
+    alertBar.classList.toggle("show", alert);
+
+    detList.innerHTML = dets.length === 0
+      ? '<div class="no-face">NO FACES IN FRAME</div>'
+      : dets.map(d => `
+          <div class="det-item" style="border-left-color:${d.color||'#888'}">
+            <div class="ddot" style="background:${d.color||'#888'}"></div>
+            <div style="flex:1">
+              <div class="dlabel">${d.label}</div>
+              <div class="dconf">Confidence: ${(d.confidence*100).toFixed(1)}%</div>
+            </div>
+            <div class="drisk risk-${d.risk||'LOW'}">${d.risk||'LOW'}</div>
+          </div>`).join("");
+  }
+
+  // ── UPDATE STATS ───────────────────────────────────────────────
+  function updateStats(s) {
+    if (!s) return;
+    document.getElementById("sMasked").textContent   = s.with_mask    || 0;
+    document.getElementById("sUnmasked").textContent = s.without_mask || 0;
+    document.getElementById("sWrong").textContent    = s.incorrect    || 0;
+    document.getElementById("sAlerts").textContent   = s.alerts       || 0;
+    document.getElementById("frames").textContent    = s.frames       || 0;
+    document.getElementById("uptime").textContent    = (s.uptime_s||0) + "s";
+    const c = s.compliance ?? 100;
+    document.getElementById("cpct").textContent  = c + "%";
+    document.getElementById("cpct").style.color  = c>=80?"var(--green)":c>=50?"var(--orange)":"var(--red)";
+    const f = document.getElementById("mfill");
+    f.style.width  = c + "%";
+    f.className    = "fill" + (c>=80?"":" " + (c>=50?"w":"b2"));
+  }
+
+  // ── FPS ────────────────────────────────────────────────────────
+  function updateFPS() {
+    const now = Date.now();
+    fpsTs.push(now);
+    fpsTs = fpsTs.filter(t => now-t < 3000);
+    document.getElementById("fps").textContent = fpsTs.length > 1
+      ? ((fpsTs.length-1) / ((now-fpsTs[0])/1000)).toFixed(1) : "—";
+  }
+</script>
+</body>
+</html>
